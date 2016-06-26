@@ -2,8 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class TankClient extends Frame{
+
+	public static final int GAME_WIDTH = 800;
+	public static final int GAME_HEIGHT = 600;
 	
 	int x =50, y = 50;
+	
+	Image offScreenImage = null;
 	
 	public void paint(Graphics g) {
 		Color c = g.getColor();
@@ -11,13 +16,25 @@ public class TankClient extends Frame{
 		g.fillOval(x, y, 30, 30);
 		g.setColor(c);
 		
-		y+=5;
+	}
+	
+	public void update(Graphics g) {
+		if(offScreenImage == null){
+			offScreenImage = this.createImage(GAME_WIDTH, GAME_HEIGHT);
+		}
+		Graphics gOffScreen = offScreenImage.getGraphics();
+		Color c = gOffScreen.getColor();
+		gOffScreen.setColor(Color.GREEN);
+		gOffScreen.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+		gOffScreen.setColor(c);
+		paint(gOffScreen);
+		g.drawImage(offScreenImage, 0, 0, null);
 	}
 
 
 	public void launchFrame(){
 		this.setLocation(400,300);
-		this.setSize(800, 600);
+		this.setSize(GAME_WIDTH, GAME_HEIGHT);
 		this.setTitle("TankWar");
 		this.addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent e) {
@@ -26,6 +43,9 @@ public class TankClient extends Frame{
 		});
 		this.setResizable(false);
 		this.setBackground(Color.GREEN);
+		
+		this.addKeyListener(new KeyMonitor());
+		
 		this.setVisible(true);
 		
 		new Thread(new PaintThread()).start();
@@ -44,7 +64,7 @@ public class TankClient extends Frame{
 			while(true){
 				repaint();    //is the method of outer class
 				try {
-					Thread.sleep(100);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -53,4 +73,29 @@ public class TankClient extends Frame{
 		}
 		
 	}
+
+	private class KeyMonitor extends KeyAdapter{
+
+		public void keyPressed(KeyEvent e) {
+			int key = e.getKeyCode();
+			switch (key){
+			case KeyEvent.VK_LEFT:
+				x -= 5;
+				break;
+			case KeyEvent.VK_UP:
+				y -= 5;
+				break;
+			case KeyEvent.VK_RIGHT:
+				x += 5;
+				break;
+			case KeyEvent.VK_DOWN:
+				y += 5;
+				break;
+			}
+			
+		}
+			
+	}
+
+
 }
