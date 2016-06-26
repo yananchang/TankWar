@@ -1,17 +1,27 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class TankClient extends Frame{
 
 	public static final int GAME_WIDTH = 800;
 	public static final int GAME_HEIGHT = 600;
 	
-	Tank myTank = new Tank(50,50);
-	Missile m = new Missile(50, 100, Tank.Direction.R);
+	Tank myTank = new Tank(50,50,this);
+	List<Missile> missiles = new ArrayList<Missile>();
+	
 	Image offScreenImage = null;
 	
+	
 	public void paint(Graphics g) {
-		m.draw(g);
+		g.drawString("missiles count:" + missiles.size(), 60, 100);
+		for (int i=0; i<missiles.size();i++){
+			Missile m = missiles.get(i);
+			m.draw(g);
+			//if(!m.isLive()) missiles.remove(m);
+			//else m.draw(g);			
+		}
 		myTank.draw(g);
 	}
 	
