@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.List;
 
 public class Missile {
 	public static final int XSPEED = 10;
@@ -10,6 +11,7 @@ public class Missile {
 	int x,y;
 	Tank.Direction dir;
 	
+	private boolean good;
 	private boolean live = true;
 	private TankClient tc;
 	
@@ -20,12 +22,17 @@ public class Missile {
 		this.dir = dir;
 	}
 	
-	public Missile(int x, int y, Tank.Direction dir, TankClient tc){
+	public Missile(int x, int y, boolean good, Tank.Direction dir, TankClient tc){
 		this(x,y,dir);
+		this.good = good;
 		this.tc = tc;
 	}
 	
 	public void draw(Graphics g){
+		if(!live) {
+			tc.missiles.remove(this);
+			return;
+		}
 		Color c = g.getColor();
 		g.setColor(Color.BLACK);
 		g.fillOval(x, y, WIDTH, HEIGHT);
@@ -35,6 +42,7 @@ public class Missile {
 	}
 
 	private void move() {
+		
 		switch (dir){
 		case L:
 			x -= XSPEED;
@@ -70,7 +78,6 @@ public class Missile {
 		
 		if (x < 0 || y < 0 || x > TankClient.GAME_WIDTH || y > TankClient.GAME_HEIGHT){
 			live = false;
-			tc.missiles.remove(this);
 		}
 	}
 	
@@ -78,4 +85,35 @@ public class Missile {
 		return live;
 	}
 	
+	public Rectangle getRect(){
+		return new Rectangle(x, y, WIDTH, HEIGHT);
+	}
+	
+	public boolean hitTank(Tank t){
+		if(this.live && this.getRect().intersects(t.getRect()) && t.isLive() && this.good != t.isGood()){
+			t.setLive(false);
+			this.live = false;
+			Explode e = new Explode(x,y,tc);
+			tc.explodes.add(e);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean hitTanks(List<Tank> tanks){
+		for(int i=0;i<tanks.size();i++){
+			if(hitTank(tanks.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean hitwall(Wall w){
+		if(this.live && this.getRect().intersects(w.getRect())){
+			this.live = false;
+			return true;
+		}
+		return false;
+	}
 }
